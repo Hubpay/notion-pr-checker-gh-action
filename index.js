@@ -4,7 +4,7 @@ const { Client } = require('@notionhq/client');
 
 async function run() {
   try {
-    const taskReferenceRegex = /Notion Task: ([A-Za-z0-9]+)/;
+    const taskReferenceRegex = /Notion Task: ([A-Za-z0-9-]+)/;
     const match = getPullRequestTitle().match(taskReferenceRegex);
 
     if (!match) {
@@ -39,7 +39,6 @@ async function run() {
 
 function getPullRequestTitle() {
   let pull_request = github.context.payload.pull_request;
-  core.debug(`Context: ${JSON.stringify(github.context.payload)}`);
   core.debug(`Pull Request: ${JSON.stringify(github.context.payload.pull_request)}`);
   if (pull_request === undefined || pull_request.title === undefined) {
     throw new Error("This action should only be run with Pull Request Events");
