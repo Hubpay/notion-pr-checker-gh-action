@@ -2688,19 +2688,10 @@ exports["default"] = _default;
 
 /***/ }),
 
-/***/ 258:
+/***/ 716:
 /***/ ((module) => {
 
-let wait = function (milliseconds) {
-  return new Promise((resolve) => {
-    if (typeof milliseconds !== 'number') {
-      throw new Error('milliseconds not a number');
-    }
-    setTimeout(() => resolve("done!"), milliseconds)
-  });
-};
-
-module.exports = wait;
+module.exports = eval("require")("@actions/github");
 
 
 /***/ }),
@@ -2835,20 +2826,34 @@ var __webpack_exports__ = {};
 // This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
 (() => {
 const core = __nccwpck_require__(186);
-const wait = __nccwpck_require__(258);
+const github = __nccwpck_require__(716);
+const http = __nccwpck_require__(255);
 
-
-// most @actions toolkit packages have async methods
 async function run() {
   try {
-    const ms = core.getInput('milliseconds');
-    core.info(`Waiting ${ms} milliseconds ...`);
+    const pr = github.context.payload.pull_request;
+    const taskReferenceRegex = /Notion Task: ([A-Za-z0-9]+)/;
+    const match = pr.title.match(taskReferenceRegex);
 
-    core.debug((new Date()).toTimeString()); // debug is only output if you set the secret `ACTIONS_RUNNER_DEBUG` to true
-    await wait(parseInt(ms));
-    core.info((new Date()).toTimeString());
+    if (!match) {
+      core.setFailed('PR title does not contain a valid Notion task reference.');
+      return;
+    }
 
-    core.setOutput('time', new Date().toTimeString());
+    const taskId = match[1];
+    const notionSecret = core.getInput('notion-secret');
+    const httpClient = new http.HttpClient('GitHub Action');
+    const response = await httpClient.get(`https://api.notion.com/v1/blocks/${taskId}`, {
+      headers: {
+        Authorization: `Bearer ${notionSecret}`,
+        'Notion-Version': '2021-05-13', // Adjust this version as needed
+      },
+    });
+
+    if (response.message.statusCode !== 200) {
+      core.setFailed('Notion task reference is not a valid issue.');
+
+    }
   } catch (error) {
     core.setFailed(error.message);
   }
