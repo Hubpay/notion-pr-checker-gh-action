@@ -1,6 +1,6 @@
 const core = require('@actions/core');
 const github = require('@actions/github');
-const http = require('@actions/http-client');
+const { Client } = require('@notionhq/client');
 
 async function run() {
   try {
@@ -14,18 +14,24 @@ async function run() {
     }
 
     const taskId = match[1];
-    const notionSecret = core.getInput('notion-secret');
-    const httpClient = new http.HttpClient('GitHub Action');
-    const response = await httpClient.get(`https://api.notion.com/v1/blocks/${taskId}`, {
-      headers: {
-        Authorization: `Bearer ${notionSecret}`,
-        'Notion-Version': '2021-05-13', // Adjust this version as needed
-      },
-    });
+    const notion = new Client({ auth: core.getInput('notion-secret') });
 
-    if (response.message.statusCode !== 200) {
-      core.setFailed('Notion task reference is not a valid issue.');
+    try {
+      const response = await notion.databases.query({
+        database_id: core.getInput('task-database'),
+        filter: {
+          property: 'Task ID', // Replace with the actual property name
+          text: {
+            equals: taskId,
+          },
+        },
+      });
 
+      if (!response.results.length) {
+        core.setFailed('Notion task reference is not a valid issue.');
+      }
+    } catch (error) {
+      core.setFailed('Error querying Notion database: ' + error.message);
     }
   } catch (error) {
     core.setFailed(error.message);

@@ -4,6 +4,9 @@ inputs:
   notion-secret:
     description: 'Secret for accessing Notion API'
     required: true
+  notion-database:
+    description: 'Task database'
+    required: true
 
 runs:
   using: 'node16'
