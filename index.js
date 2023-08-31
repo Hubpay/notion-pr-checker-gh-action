@@ -6,6 +6,7 @@ async function run() {
   try {
     const pr = github.context.payload.pull_request;
     const taskReferenceRegex = /Notion Task: ([A-Za-z0-9]+)/;
+    console.log(github.context.payload)
     const match = pr.title.match(taskReferenceRegex);
 
     if (!match) {
