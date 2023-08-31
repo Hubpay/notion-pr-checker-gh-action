@@ -10867,9 +10867,8 @@ const { Client } = __nccwpck_require__(324);
 
 async function run() {
   try {
-    const pr = github.context.payload.pull_request;
     const taskReferenceRegex = /Notion Task: ([A-Za-z0-9]+)/;
-    const match = pr.title.match(taskReferenceRegex);
+    const match = getPullRequestTitle().match(taskReferenceRegex);
 
     if (!match) {
       core.setFailed('PR title does not contain a valid Notion task reference.');
@@ -10899,6 +10898,15 @@ async function run() {
   } catch (error) {
     core.setFailed(error.message);
   }
+}
+
+function getPullRequestTitle() {
+  let pull_request = github.context.payload.pull_request;
+  core.debug(`Pull Request: ${JSON.stringify(github.context.payload.pull_request)}`);
+  if (pull_request === undefined || pull_request.title === undefined) {
+    throw new Error("This action should only be run with Pull Request Events");
+  }
+  return pull_request.title;
 }
 
 run();
