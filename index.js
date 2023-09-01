@@ -1,5 +1,6 @@
 const core = require('@actions/core');
 const github = require('@actions/github');
+const { Octokit } = require('@octokit/action');
 const {Client} = require('@notionhq/client');
 
 const taskReferenceRegex = /\b([A-Z]+-\d+)\b/g;
@@ -44,8 +45,7 @@ async function run() {
 
 async function getPullRequestTitle() {
 
-    const authToken = core.getInput('github_token', {required: true})
-    const octokit = github.getOctokit(authToken);
+    const octokit = new Octokit();
     const owner = github.context.payload.pull_request.base.user.login;
     const repo = github.context.payload.pull_request.base.repo.name;
 
@@ -56,7 +56,7 @@ async function getPullRequestTitle() {
         return;
     }
 
-    const {data: pullRequest} = await octokit.rest.request.pulls.get({
+    const {data: pullRequest} = await octokit.rest.pulls.get({
         owner,
         repo,
         pull_number: github.context.payload.pull_request.number
