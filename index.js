@@ -36,7 +36,8 @@ async function run() {
             if (!response.results.length) {
                 core.setFailed('Notion task reference is not a valid issue.');
             }
-            core.setOutput("Notion verifier", `Successfully matched Notion ${taskId}`)
+            core.setOutput("notion_task", `Successfully matched Notion ${taskId}`)
+            core.summary.addLink("Notion task", response.results[0].url)
         } catch (error) {
             core.setFailed('Error querying Notion database: ' + error.message);
         }

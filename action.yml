@@ -10,6 +10,9 @@ inputs:
   token:
     description: 'Required GH token to use the API to get latest title'
     required: true
+outputs:
+  notion_task:
+    description: Result task ID
 
 runs:
   using: 'node16'
