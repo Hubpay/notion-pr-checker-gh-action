@@ -10905,13 +10905,27 @@ async function run() {
     }
 }
 
-function getPullRequestTitle() {
-    let pull_request = github.context.payload.pull_request;
-    core.debug(`Pull Request: ${JSON.stringify(github.context.payload.pull_request)}`);
-    if (pull_request === undefined || pull_request.title === undefined) {
-        throw new Error("This action should only be run with Pull Request Events");
+async function getPullRequestTitle() {
+
+    const authToken = core.getInput('github_token', {required: true})
+    const octokit = github.getOctokit(authToken);
+    const owner = github.context.payload.pull_request.base.user.login;
+    const repo = github.context.payload.pull_request.base.repo.name;
+
+    const eventName = github.context.eventName;
+    core.info(`Event name: ${eventName}`);
+    if ('pull_request' !== eventName) {
+        core.setFailed(`Invalid event: ${eventName}`);
+        return;
     }
-    return pull_request.title;
+
+    const {data: pullRequest} = await octokit.rest.request.pulls.get({
+        owner,
+        repo,
+        pull_number: github.context.payload.pull_request.number
+    });
+
+    return pullRequest.title;
 }
 
 run();

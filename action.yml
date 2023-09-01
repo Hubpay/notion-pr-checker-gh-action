@@ -7,6 +7,9 @@ inputs:
   notion-database:
     description: 'Task database'
     required: true
+  github_token:
+    description: 'Required to use the API to get latest title'
+    required: true
 
 runs:
   using: 'node16'
