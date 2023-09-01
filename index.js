@@ -23,7 +23,7 @@ async function run() {
                 filter: {
                     property: 'Task ID', // Replace with the actual property name
                     number: {
-                        equals: taskId.split('-')[1],
+                        equals: parseInt(taskId.split('-')[1]),
                     },
                 },
             });
