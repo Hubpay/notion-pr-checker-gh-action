@@ -37423,6 +37423,7 @@ async function run() {
             if (!response.results.length) {
                 core.setFailed('Notion task reference is not a valid issue.');
             }
+            core.setOutput("Notion verifier", `Successfully matched Notion ${taskId}`)
         } catch (error) {
             core.setFailed('Error querying Notion database: ' + error.message);
         }
