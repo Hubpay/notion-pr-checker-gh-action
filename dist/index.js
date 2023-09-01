@@ -37395,7 +37395,7 @@ const taskReferenceRegex = /\b([A-Z]+-\d+)\b/g;
 async function run() {
     try {
 
-        const match = await getPullRequestTitle().match(taskReferenceRegex);
+        const match = (await getPullRequestTitle()).match(taskReferenceRegex);
 
         if (!match) {
             core.setFailed('PR title does not contain a valid Notion task reference.');
