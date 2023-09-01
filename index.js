@@ -8,7 +8,7 @@ const taskReferenceRegex = /\b([A-Z]+-\d+)\b/g;
 async function run() {
     try {
 
-        const match = getPullRequestTitle().match(taskReferenceRegex);
+        const match = await getPullRequestTitle().match(taskReferenceRegex);
 
         if (!match) {
             core.setFailed('PR title does not contain a valid Notion task reference.');
@@ -50,7 +50,7 @@ async function getPullRequestTitle() {
     const repo = github.context.payload.pull_request.base.repo.name;
 
     const eventName = github.context.eventName;
-    core.info(`Event name: ${eventName}`);
+    core.debug(`Event name: ${eventName}`);
     if ('pull_request' !== eventName) {
         core.setFailed(`Invalid event: ${eventName}`);
         return;
@@ -62,6 +62,7 @@ async function getPullRequestTitle() {
         pull_number: github.context.payload.pull_request.number
     });
 
+    core.debug(`Pull request title: ${pullRequest.title}`);
     return pullRequest.title;
 }
 
