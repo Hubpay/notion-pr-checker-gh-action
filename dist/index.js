@@ -37423,13 +37423,6 @@ async function run() {
             if (!response.results.length) {
                 core.setFailed('Notion task reference is not a valid issue.');
             }
-
-            await octokit.issues.createComment({
-                ...github.context.repo,
-                issue_number: github.context.payload.pull_request.number,
-                body: `Found Notion issue ${taskId}`
-            });
-
         } catch (error) {
             core.setFailed('Error querying Notion database: ' + error.message);
         }
