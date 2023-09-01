@@ -10865,9 +10865,10 @@ const core = __nccwpck_require__(2186);
 const github = __nccwpck_require__(5438);
 const { Client } = __nccwpck_require__(324);
 
+const taskReferenceRegex = /\b([A-Z]+-\d+)\b/g;
 async function run() {
   try {
-    const taskReferenceRegex = /Notion Task: ([A-Za-z0-9-]+)/;
+
     const match = getPullRequestTitle().match(taskReferenceRegex);
 
     if (!match) {
@@ -10875,7 +10876,7 @@ async function run() {
       return;
     }
 
-    const taskId = match[1];
+    const taskId = match[0];
     const notion = new Client({ auth: core.getInput('notion-secret') });
 
     try {
@@ -10883,8 +10884,8 @@ async function run() {
         database_id: core.getInput('task-database'),
         filter: {
           property: 'Task ID', // Replace with the actual property name
-          text: {
-            equals: taskId,
+          number: {
+            equals: taskId.split('-')[1],
           },
         },
       });
