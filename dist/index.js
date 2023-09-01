@@ -10863,51 +10863,52 @@ var __webpack_exports__ = {};
 (() => {
 const core = __nccwpck_require__(2186);
 const github = __nccwpck_require__(5438);
-const { Client } = __nccwpck_require__(324);
+const {Client} = __nccwpck_require__(324);
 
 const taskReferenceRegex = /\b([A-Z]+-\d+)\b/g;
+
 async function run() {
-  try {
-
-    const match = getPullRequestTitle().match(taskReferenceRegex);
-
-    if (!match) {
-      core.setFailed('PR title does not contain a valid Notion task reference.');
-      return;
-    }
-
-    const taskId = match[0];
-    const notion = new Client({ auth: core.getInput('notion-secret') });
-
     try {
-      const response = await notion.databases.query({
-        database_id: core.getInput('task-database'),
-        filter: {
-          property: 'Task ID', // Replace with the actual property name
-          number: {
-            equals: taskId.split('-')[1],
-          },
-        },
-      });
 
-      if (!response.results.length) {
-        core.setFailed('Notion task reference is not a valid issue.');
-      }
+        const match = getPullRequestTitle().match(taskReferenceRegex);
+
+        if (!match) {
+            core.setFailed('PR title does not contain a valid Notion task reference.');
+            return;
+        }
+
+        const taskId = match[0];
+        const notion = new Client({auth: core.getInput('notion-secret', {required: true})});
+
+        try {
+            const response = await notion.databases.query({
+                database_id: core.getInput('notion-database', {required: true}),
+                filter: {
+                    property: 'Task ID', // Replace with the actual property name
+                    number: {
+                        equals: taskId.split('-')[1],
+                    },
+                },
+            });
+
+            if (!response.results.length) {
+                core.setFailed('Notion task reference is not a valid issue.');
+            }
+        } catch (error) {
+            core.setFailed('Error querying Notion database: ' + error.message);
+        }
     } catch (error) {
-      core.setFailed('Error querying Notion database: ' + error.message);
+        core.setFailed(error.message);
     }
-  } catch (error) {
-    core.setFailed(error.message);
-  }
 }
 
 function getPullRequestTitle() {
-  let pull_request = github.context.payload.pull_request;
-  core.debug(`Pull Request: ${JSON.stringify(github.context.payload.pull_request)}`);
-  if (pull_request === undefined || pull_request.title === undefined) {
-    throw new Error("This action should only be run with Pull Request Events");
-  }
-  return pull_request.title;
+    let pull_request = github.context.payload.pull_request;
+    core.debug(`Pull Request: ${JSON.stringify(github.context.payload.pull_request)}`);
+    if (pull_request === undefined || pull_request.title === undefined) {
+        throw new Error("This action should only be run with Pull Request Events");
+    }
+    return pull_request.title;
 }
 
 run();
