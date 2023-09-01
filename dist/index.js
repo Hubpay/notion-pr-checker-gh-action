@@ -10881,16 +10881,19 @@ async function run() {
         const notion = new Client({auth: core.getInput('notion-secret', {required: true})});
 
         try {
+            const taskNumber = parseInt(taskId.split('-')[1]);
+            const databaseId = core.getInput('notion-database', {required: true});
+            core.debug(`Searching for: ${taskNumber} in database: ${databaseId}`);
             const response = await notion.databases.query({
-                database_id: core.getInput('notion-database', {required: true}),
+                database_id: databaseId,
                 filter: {
                     property: 'Task ID', // Replace with the actual property name
                     number: {
-                        equals: parseInt(taskId.split('-')[1]),
+                        equals: taskNumber,
                     },
                 },
             });
-
+            core.debug(`Results ${JSON.stringify(response)}`);
             if (!response.results.length) {
                 core.setFailed('Notion task reference is not a valid issue.');
             }
