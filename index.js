@@ -8,7 +8,8 @@ const taskReferenceRegex = /\b([A-Z]+-\d+)\b/g;
 async function run() {
     try {
 
-        const match = (await getPullRequestTitle()).match(taskReferenceRegex);
+        const octokit = new Octokit();
+        const match = (await getPullRequestTitle(octokit)).match(taskReferenceRegex);
 
         if (!match) {
             core.setFailed('PR title does not contain a valid Notion task reference.');
@@ -35,6 +36,13 @@ async function run() {
             if (!response.results.length) {
                 core.setFailed('Notion task reference is not a valid issue.');
             }
+
+            await octokit.issues.createComment({
+                ...github.context.repo,
+                issue_number: github.context.payload.pull_request.number,
+                body: `Found Notion issue ${taskId}`
+            });
+
         } catch (error) {
             core.setFailed('Error querying Notion database: ' + error.message);
         }
@@ -43,9 +51,9 @@ async function run() {
     }
 }
 
-async function getPullRequestTitle() {
+async function getPullRequestTitle(octokit) {
 
-    const octokit = new Octokit();
+
     const owner = github.context.payload.pull_request.base.user.login;
     const repo = github.context.payload.pull_request.base.repo.name;
 
