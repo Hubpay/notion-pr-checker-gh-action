@@ -7,8 +7,8 @@ inputs:
   notion-database:
     description: 'Task database'
     required: true
-  github_token:
-    description: 'Required to use the API to get latest title'
+  token:
+    description: 'Required GH token to use the API to get latest title'
     required: true
 
 runs:
