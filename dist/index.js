@@ -37425,6 +37425,7 @@ async function run() {
             }
             core.setOutput("notion_task", `Successfully matched Notion ${taskId}`)
             core.summary.addLink("Notion task", response.results[0].url)
+            await core.summary.write()
         } catch (error) {
             core.setFailed('Error querying Notion database: ' + error.message);
         }
